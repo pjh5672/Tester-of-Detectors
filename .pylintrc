@@ -1,0 +1,20 @@
+[pylint]
+
+disable=
+    W0311, # Bad indentation
+    C0413, # wrong-import-position
+    C0301, # line-too-long
+    C0114, # missing-module-docstring
+    W0107, # unnecessary-pass
+    R0903, # too-few-public-methods
+    C0103, # invalid-name
+    E0401, # import-error
+    C0116, # missing-function-docstring
+    W0621, # redefined-outer-name
+    E1101, # no-member
+    R0914, # too-many-locals
+    R0913, # too-many-arguments
+    W0401, # wildcard-import
+    E0602, # undefined-variable
+    R0902, # too-many-instance-attributes
+    W0201, # attribute-defined-outside-init
