@@ -68,6 +68,8 @@ pred_yolo, pred_voc = detector.detect(frame)
     </div>
 
 
+## Update
+
 <details>
     <summary><b> Timeline in 2022 </b></summary>
 
