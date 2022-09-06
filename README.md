@@ -1,18 +1,18 @@
 # <div align="center">Object Detector Tester</div>
 
-## Description
+## [Description]
 
 This is repository of source code for testing trained object detection models. Currently only supports trained YOLOv3 model architecture.
 
 
-### Usage
+## [Usage]
 
-#### 1. Installation
+### 1. Installation
 ```bash
 $ pip install -r requirements.txt
 ```
 
-#### 2. Build **`parameter`**
+### 2. Build **`parameter`**
  - **parameter** 
     - input_size: input size calculated by detection model
     - num_classes: number of prediction classes in detection model
@@ -35,7 +35,7 @@ parameter.device = 0
 model = Factory.build_model(model_name=model_name, weight_path=weight_path, param=parameter)
 ```
  
-#### 3. Set up **`detector`**
+### 3. Set up **`detector`**
 
 ```python
 from detector import Detector
@@ -44,7 +44,7 @@ detector = Detector()
 detector.model = model
 ```
 
-#### 4. Run
+### 4. Run
  - image frame should be on RGB color space
  - pred_yolo 
     - prediction output for labeling data format for automatic collection of training data
@@ -68,7 +68,7 @@ pred_yolo, pred_voc = detector.detect(frame)
     </div>
 
 
-## Update
+## [Update]
 
 <details>
     <summary><b> Timeline in 2022 </b></summary>
@@ -80,6 +80,6 @@ pred_yolo, pred_voc = detector.detect(frame)
 </details>
 
 
-## Contact
+## [Contact]
 - Author: Jiho Park  
 - Email: pjh5672.dev@gmail.com  
