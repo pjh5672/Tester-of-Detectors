@@ -1,5 +1,19 @@
 # <div align="center">Object Detector Tester</div>
 
+---
+
+## [Contents]  
+1. [Description](#description)  
+2. [Usage](#usage)  
+  2-1. [Install](#install)  
+  2-2. [Build **`Parameter`**](#build-parameter)  
+  2-3. [Set up **`Detector`**](#set-up-detector)  
+  2-4. [Detect](#detect)  
+3. [Update](#update)  
+4. [Contact](#contact)  
+
+---
+
 ## [Description]
 
 This is repository of source code for testing trained object detection models. Currently only supports trained YOLOv3 model architecture.
@@ -7,22 +21,22 @@ This is repository of source code for testing trained object detection models. C
 
 ## [Usage]
 
-### 1. Installation
+### Install
 ```bash
 $ pip install -r requirements.txt
 ```
 
-### 2. Build **`parameter`**
- - **parameter** 
-    - input_size: input size calculated by detection model
-    - num_classes: number of prediction classes in detection model
-    - conf_threshold: minimum confidence threshold to filter detection results
-    - nms_threshold: minimum IoU threshold for Non-Maximum Suppresion
-    - max_dets: maximum number of final detected results in a single image
-    - device: computational device setting (-1: for CPU, >=0: for GPU(gpu id))
-    - anchors: setting the anchor box size
-    - class_list: category name corresponding to the detection class of the model
- - **model**
+### Build **`Parameter`**
+ - **Parameter** 
+    - **`input_size`**: input size calculated by detection model
+    - **`num_classes`**: number of prediction classes in detection model
+    - **`conf_threshold`**: minimum confidence threshold to filter detection results
+    - **`nms_threshold`**: minimum IoU threshold for Non-Maximum Suppresion
+    - **`max_dets`**: maximum number of final detected results in a single image
+    - **`device`**: computational device setting (-1: for CPU, >=0: for GPU(gpu id))
+    - **`anchors`**: setting the anchor box size
+    - **`class_list`**: category name corresponding to the detection class of the model
+ - **Model**
     - detector model architecture for deploying
 
 ```python
@@ -35,7 +49,7 @@ parameter.device = 0
 model = Factory.build_model(model_name=model_name, weight_path=weight_path, param=parameter)
 ```
  
-### 3. Set up **`detector`**
+### Set up **`Detector`**
 
 ```python
 from detector import Detector
@@ -44,14 +58,14 @@ detector = Detector()
 detector.model = model
 ```
 
-### 4. Run
+### Detect
  - image frame should be on RGB color space
- - pred_yolo 
+ - **pred_yolo** 
     - prediction output for labeling data format for automatic collection of training data
-    - [num_objects, YOLO format] sized matrix, YOLO format of **(class_id, norm_xc, norm_yc, norm_w, norm_h, confidence score)**
- - pred_voc
+    - [num_objects, YOLO format] sized matrix, YOLO format of `(class_id, norm_xc, norm_yc, norm_w, norm_h, confidence score)`
+ - **pred_voc**
     - prediction output for displaying bounding box on the original image
-    - [num_objects, VOC format] sized matrix, VOC format of **(class_id, image_x1, image_y1, image_x2, image_y2, confidence score)**
+    - [num_objects, VOC format] sized matrix, VOC format of `(class_id, image_x1, image_y1, image_x2, image_y2, confidence score)`
 
 ```python
 image_path = './samples/image.jpg'
