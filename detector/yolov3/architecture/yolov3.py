@@ -12,15 +12,10 @@ class YOLOv3_Model(nn.Module):
     """
     def __init__(self, input_size, num_classes, anchors):
         super().__init__()
-        num_attribute = 5 + num_classes
-        num_anchor_per_scale = len(anchors[0])
-        last_dim_channels = num_attribute * num_anchor_per_scale
         self.backbone = Darknet53_backbone()
-        self.fpn = YOLOv3_FPN(last_dim_channels=last_dim_channels)
-        self.head = YOLOv3_head(input_size=input_size,
-                                num_classes=num_classes,
-                                anchors=anchors,
-                                num_anchor_per_scale=num_anchor_per_scale)
+        self.fpn = YOLOv3_FPN()
+        self.head = YOLOv3_head(input_size=input_size, num_classes=num_classes, anchors=anchors)
+
 
     def forward(self, x):
         x1, x2, x3 = self.backbone(x)

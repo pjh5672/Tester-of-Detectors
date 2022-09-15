@@ -112,13 +112,17 @@ if __name__ == '__main__':
 
     source = './example/samples/image.jpg'
     # source = './example/samples/images'
+    # source = './example/samples/videos/1280x720_many_motor_1.mp4'
     frames, frame_info = load_source(source)
 
     model_name = 'yolov3'
-    weight_path = './weights/model_EP035.pt'
+    weight_path = './weights/voc_best.pt'
 
     param = Factory.build_param(model_name=model_name)
     param.device = 0
+    param.num_classes = 20
+    param.conf_threshold = 0.5
+    
     model = Factory.build_model(model_name=model_name, weight_path=weight_path, param=param)
 
     detector = Detector()
@@ -130,11 +134,11 @@ if __name__ == '__main__':
     if frame_info['run_mode'] == 0:
         if len(frames) == 1:
             os.makedirs(str(ROOT/'example/results/'), exist_ok=True)
-            detect_image(filename=frames[0].name, file_path=str(frames[0]))
+            detect_image(filename=frames[0].name, file_path=str(frames[0]), class_list=class_list, color_list=color_list)
         else:
             dirname = frames[0].parent.name
             os.makedirs(str(ROOT/f'./example/results/{dirname}'), exist_ok=True)
-            detect_images(dirname=dirname, file_paths=frames)
+            detect_images(dirname=dirname, file_paths=frames, class_list=class_list, color_list=color_list)
     elif frame_info['run_mode'] == 1:
         vid_name = Path(source).name
         os.makedirs(str(ROOT/f'./example/results/videos'), exist_ok=True)

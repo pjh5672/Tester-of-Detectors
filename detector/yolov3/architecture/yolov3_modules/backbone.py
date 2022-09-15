@@ -1,12 +1,7 @@
-from pathlib import Path
-
-import torch
 from torch import nn
 
 from element import ConvLayer, ResBlock
 
-FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]
 
 
 class Darknet53_backbone(nn.Module):
@@ -23,8 +18,6 @@ class Darknet53_backbone(nn.Module):
         self.res_block3 = self._build_Conv_and_ResBlock(128, 256, 8)
         self.res_block4 = self._build_Conv_and_ResBlock(256, 512, 8)
         self.res_block5 = self._build_Conv_and_ResBlock(512, 1024, 4)
-
-        self.apply(self._weight_init_xavier_uniform)
 
 
     def forward(self, x):
@@ -43,10 +36,3 @@ class Darknet53_backbone(nn.Module):
         for idx in range(num_block):
             model.add_module(f"res{idx}", ResBlock(out_channels))
         return model
-
-
-    def _weight_init_xavier_uniform(self, module):
-        if isinstance(module, torch.nn.Conv2d):
-            torch.nn.init.xavier_uniform_(module.weight)
-        elif isinstance(module, torch.nn.BatchNorm2d):
-            module.weight.data.fill_(1.0)

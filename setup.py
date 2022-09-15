@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="avikus-detector",
+    name="Detector-YOLOv3",
     version=os.getenv("GITHUB_REF_NAME", "v0.0.1"),
     author="Jiho Park",
-    author_email="jiho.park@avikus.ai",
-    description="Avikus detector library package",
+    author_email="pjh5672.dev@gmail.com",
+    description="",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/avikus-ai/detector-lib.git",
+    url="",
     packages=setuptools.find_packages(exclude=["*tests*","*example*","*weights*"]),
     classifiers=[
         "Programming Language :: Python :: 3",

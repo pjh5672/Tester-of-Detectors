@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+from element import ConvLayer
+
 
 
 class DetectLayer(nn.Module):
@@ -9,14 +11,17 @@ class DetectLayer(nn.Module):
     Args:
         nn (_type_): _description_
     """
-    def __init__(self, input_size, num_classes, anchors, num_anchor_per_scale):
+    def __init__(self, in_channels, input_size, num_classes, anchors):
         super().__init__()
         self.input_size = input_size
         self.num_classes = num_classes
         self.num_attribute =  5 + num_classes
-        self.num_anchor_per_scale = num_anchor_per_scale
+        self.num_anchor_per_scale = len(anchors)
+        self.last_dim_channels = self.num_attribute * self.num_anchor_per_scale
         self.anchor_w = anchors[:, 0].view((1, self.num_anchor_per_scale, 1, 1))
         self.anchor_h = anchors[:, 1].view((1, self.num_anchor_per_scale, 1, 1))
+        self.conv1 = ConvLayer(in_channels, in_channels*2, 3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(in_channels*2, self.last_dim_channels, 1, stride=1, padding=0, bias=True)
 
 
     def forward(self, x):
@@ -25,7 +30,8 @@ class DetectLayer(nn.Module):
         grid_size = x.shape[2]
         self.stride = self.input_size / grid_size
 
-        out = x.view(batch_size, self.num_anchor_per_scale, self.num_attribute, grid_size, grid_size)
+        out = self.conv2(self.conv1(x))
+        out = out.view(batch_size, self.num_anchor_per_scale, self.num_attribute, grid_size, grid_size)
         out = out.permute(0, 1, 3, 4, 2).contiguous()
         grid_xy = self.compute_grid_offset(grid_size)
         pred_bboxes = self.transform_pred_coords(bboxes=out[..., :4], grid_xy=grid_xy)
@@ -61,30 +67,30 @@ class YOLOv3_head(nn.Module):
     Args:
         nn (_type_): _description_
     """
-    def __init__(self, input_size, num_classes, anchors, num_anchor_per_scale):
+    def __init__(self, input_size, num_classes, anchors):
         super().__init__()
         self.input_size = input_size
         self.num_classes = num_classes
         self.anchor_scale = self.input_size / 416
-        self.num_anchor_per_scale = num_anchor_per_scale
         self.anchor_L = torch.Tensor(anchors[2]) * self.anchor_scale
         self.anchor_M = torch.Tensor(anchors[1]) * self.anchor_scale
         self.anchor_S = torch.Tensor(anchors[0]) * self.anchor_scale
 
-        self.head_L = DetectLayer(input_size=self.input_size,
+        self.head_L = DetectLayer(in_channels=512,
+                                  input_size=self.input_size,
                                   num_classes=self.num_classes,
-                                  anchors=self.anchor_L,
-                                  num_anchor_per_scale=self.num_anchor_per_scale)
+                                  anchors=self.anchor_L)
 
-        self.head_M = DetectLayer(input_size=self.input_size,
+        self.head_M = DetectLayer(in_channels=256,
+                                  input_size=self.input_size,
                                   num_classes=self.num_classes,
-                                  anchors=self.anchor_M,
-                                  num_anchor_per_scale=self.num_anchor_per_scale)
+                                  anchors=self.anchor_M)
 
-        self.head_S = DetectLayer(input_size=self.input_size,
+        self.head_S = DetectLayer(in_channels=128,
+                                  input_size=self.input_size,
                                   num_classes=self.num_classes,
-                                  anchors=self.anchor_S,
-                                  num_anchor_per_scale=self.num_anchor_per_scale)
+                                  anchors=self.anchor_S)
+
 
     def forward(self, x1, x2, x3):
         pred_L = self.head_L(x1)

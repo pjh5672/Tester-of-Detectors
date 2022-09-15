@@ -1,10 +1,12 @@
 import cv2
 import torch
 import numpy as np
+import torchvision.transforms.functional as TF
 
 
-MEAN = (0.485, 0.456, 0.406)
-STD = (0.229, 0.224, 0.225)
+IMAGENET_MEAN = 0.485, 0.456, 0.406  # RGB mean
+IMAGENET_STD = 0.229, 0.224, 0.225  # RGB standard deviation
+
 
 
 def load_model(model, weight_path, device):
@@ -15,28 +17,37 @@ def load_model(model, weight_path, device):
 
 
 def preprocess(image, input_size):
-    pad_image, max_side = letterbox_image(image)
-    pad_image = pad_image/pad_image.max()
-    pad_image = (pad_image - MEAN) / STD
-    pad_image = cv2.resize(pad_image, dsize=(input_size, input_size))
-    tensor_image = torch.from_numpy(pad_image).float()
-    tensor_image = tensor_image.unsqueeze(dim=0).permute(0,3,1,2).contiguous()
-    return tensor_image, max_side
+    image, max_size = transform_square_image(image)
+    image = cv2.resize(image, dsize=(input_size, input_size))
+    tensor = normalize(to_tensor(image))
+    return tensor, max_size
 
 
-def letterbox_image(image):
+def to_tensor(image):
+    image = np.ascontiguousarray(image.transpose(2, 0, 1))
+    image = torch.from_numpy(image).float()
+    image /= 255.
+    return image
+
+
+def normalize(image, mean=IMAGENET_MEAN, std=IMAGENET_STD):
+    tensor = TF.normalize(image, mean, std)
+    return tensor
+
+
+def transform_square_image(image):
     pad_h, pad_w = 0, 0
     img_h, img_w, img_c = image.shape
-    max_side = max(img_h, img_w)
+    max_size = max(img_h, img_w)
 
-    if img_h < max_side:
-        pad_h = max_side - img_h
-    if img_w < max_side:
-        pad_w = max_side - img_w
+    if img_h < max_size:
+        pad_h = max_size - img_h
+    if img_w < max_size:
+        pad_w = max_size - img_w
 
     pad_image = np.zeros(shape=(img_h+pad_h, img_w+pad_w, img_c), dtype=image.dtype)
     pad_image[:img_h, :img_w, :] = image
-    return pad_image, max_side
+    return pad_image, max_size
 
 
 def scale_to_original(bboxes, scale_w, scale_h):
@@ -80,6 +91,7 @@ def run_NMS_for_YOLO(prediction, iou_threshold=0.5, maxDets=100):
 
     if len(bboxes) == 0:
         return []
+
     if bboxes.dtype.kind == "i":
         bboxes = bboxes.astype("float")
 
@@ -104,6 +116,7 @@ def run_NMS_for_YOLO(prediction, iou_threshold=0.5, maxDets=100):
         yy2 = np.minimum(y2[i], y2[order[1:]])
         w = np.maximum(0, xx2 - xx1 + 1)
         h = np.maximum(0, yy2 - yy1 + 1)
+
         overlap = (w * h)
         ious = overlap / (areas[i] + areas[order[1:]] - overlap + 1e-8)
         order = order[np.where(ious <= iou_threshold)[0] + 1]
