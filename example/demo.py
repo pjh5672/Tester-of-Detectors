@@ -61,8 +61,8 @@ def imwrite(filename, image):
 def detect_image(filename, file_path, class_list, color_list):
     frame = cv2.imread(file_path)
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    pred_yolo, pred_voc = detector.detect(frame)
-    canvas = visualize(frame, pred_voc, class_list, color_list, True, True)
+    out = detector.detect(frame)
+    canvas = visualize(frame, out, class_list, color_list, True, True)
     imwrite(str(ROOT / f'./example/results/{filename}'), canvas)
 
 
@@ -71,8 +71,8 @@ def detect_images(dirname, file_paths, class_list, color_list):
         filename = image_path.name
         frame = cv2.imread(str(image_path))
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        pred_yolo, pred_voc = detector.detect(frame)
-        canvas = visualize(frame, pred_voc, class_list, color_list, True, True)
+        out = detector.detect(frame)
+        canvas = visualize(frame, out, class_list, color_list, True, True)
         imwrite(str(ROOT/f'./example/results/{dirname}/{filename}'), canvas)
 
 
@@ -87,9 +87,9 @@ def detect_video(vid_name, video, frame_info, class_list, color_list, rec=False,
         if ret:
             since = time.time()
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            pred_yolo, pred_voc = detector.detect(frame)
+            out = detector.detect(frame)
             text= f'{(time.time() - since)*1000:.0f}ms/image'
-            canvas = visualize(frame, pred_voc, class_list, color_list, True, True)
+            canvas = visualize(frame, out, class_list, color_list, True, True)
             canvas = np.ascontiguousarray(canvas, dtype=np.uint8)
             cv2.putText(canvas, text, (15, 30), cv2.FONT_HERSHEY_PLAIN, 1.5, (230, 230, 230), 2)
             cv2.imshow(vid_name, canvas)
@@ -119,9 +119,8 @@ if __name__ == '__main__':
     weight_path = './weights/voc_best.pt'
 
     param = Factory.build_param(model_name=model_name)
-    param.device = 0
+    param.device = -1
     param.num_classes = 20
-    param.conf_threshold = 0.5
     
     model = Factory.build_model(model_name=model_name, weight_path=weight_path, param=param)
 

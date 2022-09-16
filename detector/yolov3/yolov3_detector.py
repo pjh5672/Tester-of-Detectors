@@ -46,23 +46,22 @@ class YOLOv3_Detector(Detector):
 		img_h, img_w, _ = image.shape
 		tensor, max_size = preprocess(image, self.input_size)
 		predictions = self.model(tensor.unsqueeze(dim=0).to(self.device))
-		predictions = torch.cat(predictions, dim=1)[0]
+		predictions = torch.cat(predictions, dim=1)
 		predictions[..., 4:] = torch.sigmoid(predictions[..., 4:])
 		predictions[..., 5:] *= predictions[..., 4:5]
 
-		pred_yolo = predictions.cpu().numpy()
-		pred_yolo[:, :4] = clip_box_coordinates(bboxes=pred_yolo[:, :4]/self.input_size)
-		pred_yolo = filter_obj_score(prediction=pred_yolo, conf_threshold=self.conf_thresh)
-		pred_yolo = run_NMS_for_YOLO(prediction=pred_yolo, iou_threshold=self.nms_thresh, maxDets=self.max_dets)
+		prediction = predictions[0].cpu().numpy()
+		prediction[:, :4] = box_transform_xcycwh_to_x1y1x2y2(prediction[:, :4], clip_max=self.input_size)
+		prediction = filter_obj_score(prediction=prediction, conf_threshold=self.conf_thresh)
+		prediction = run_NMS(prediction, iou_threshold=self.nms_thresh, maxDets=self.max_dets, class_agnostic=False)
 
-		if len(pred_yolo) > 0:
-			pred_voc = pred_yolo.copy()
-			pred_voc[:, 1:5][:,[0,2]] *= (max_size/img_w)
-			pred_voc[:, 1:5][:,[1,3]] *= (max_size/img_h)
-			pred_voc[:, 1:5] = box_transform_xcycwh_to_x1y1x2y2(pred_voc[:, 1:5])
-			pred_voc[:, 1:5] = scale_to_original(pred_voc[:, 1:5], scale_w=img_w, scale_h=img_h)
-			return pred_yolo, pred_voc
-		return [], []
+		if len(prediction) > 0:
+			prediction[:, 1:5] /= self.input_size
+			prediction[:, 1:5][:,[0,2]] *= (max_size/img_w)
+			prediction[:, 1:5][:,[1,3]] *= (max_size/img_h)
+			prediction[:, 1:5] = scale_to_original(prediction[:, 1:5], scale_w=img_w, scale_h=img_h)
+			return prediction
+		return []
 
 
 	def __del__(self):
