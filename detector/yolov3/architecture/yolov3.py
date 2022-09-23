@@ -1,6 +1,6 @@
 from torch import nn
 
-from yolov3_modules import Darknet53_backbone, YOLOv3_FPN, YOLOv3_head
+from yolov3_modules import Darknet53, YOLOv3_FPN, YOLOv3_head
 
 
 
@@ -12,7 +12,7 @@ class YOLOv3_Model(nn.Module):
     """
     def __init__(self, input_size, num_classes, anchors):
         super().__init__()
-        self.backbone = Darknet53_backbone()
+        self.backbone = Darknet53()
         self.fpn = YOLOv3_FPN()
         self.head = YOLOv3_head(input_size=input_size, num_classes=num_classes, anchors=anchors)
 

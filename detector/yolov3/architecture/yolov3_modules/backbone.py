@@ -4,7 +4,7 @@ from element import ConvLayer, ResBlock
 
 
 
-class Darknet53_backbone(nn.Module):
+class Darknet53(nn.Module):
     """_summary_
 
     Args:

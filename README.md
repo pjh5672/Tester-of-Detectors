@@ -89,6 +89,7 @@ detector.model = model
 
 | Date | Content |
 |:----:|:-----|
+| 09-16 | fix:rename yolov3 class architecture |
 | 09-16 | add:non-maximum suppresion with multi-class & class-agnostic |
 | 09-15 | first code cleansing |
 | 08-24 | first commit |
